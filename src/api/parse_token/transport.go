@@ -5,13 +5,14 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"golang.org/x/net/context"
 
 	"fmt"
 )
 
 var PathTemplate = "/api/v1/token/{token}"
 
-func DecodeRequest(r *http.Request) (interface{}, error) {
+func DecodeRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	vars := mux.Vars(r)
 	token, ok := vars["token"]
 	if !ok {

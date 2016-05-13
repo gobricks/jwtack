@@ -41,9 +41,9 @@ func Handler(ctx context.Context, bs b.Service, logger kitlog.Logger) http.Handl
 	return r
 }
 
-func encodeResponse(w http.ResponseWriter, response interface{}) error {
+func encodeResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {
 	if e, ok := response.(errorer); ok && e.Error() != nil {
-		encodeError(w, e.Error())
+		encodeError(ctx, e.Error(), w)
 		return nil
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -55,7 +55,7 @@ type errorer interface {
 }
 
 // encode errors from business-logic
-func encodeError(w http.ResponseWriter, err error) {
+func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	switch err {
 	//case cargo.ErrUnknown:
 	//	w.WriteHeader(http.StatusNotFound)

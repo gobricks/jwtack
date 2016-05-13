@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"golang.org/x/net/context"
 
 	"fmt"
 	"io/ioutil"
@@ -15,7 +16,7 @@ import (
 
 var PathTemplate = "/api/v1/token"
 
-func DecodeCreateTokenRequest(r *http.Request) (interface{}, error) {
+func DecodeCreateTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	body, _ := ioutil.ReadAll(r.Body)
 	bodyReader := strings.NewReader(string(body))
 	var reqBody struct {
@@ -32,7 +33,7 @@ func DecodeCreateTokenRequest(r *http.Request) (interface{}, error) {
 	return CreateTokenRequest{reqBody.Key, reqBody.Payload, reqBody.Exp}, nil
 }
 
-func EncodeCreateTokennRequest(r *http.Request, request interface{}) (err error) {
+func EncodeCreateTokennRequest(_ context.Context, r *http.Request, request interface{}) (err error) {
 	var buf bytes.Buffer
 	cbr := request.(CreateTokenRequest)
 	if err = json.NewEncoder(&buf).Encode(cbr); err != nil {
@@ -54,7 +55,7 @@ func EncodeCreateTokennRequest(r *http.Request, request interface{}) (err error)
 	return
 }
 
-func DecodeCreateTokenResponse(resp *http.Response) (interface{}, error) {
+func DecodeCreateTokenResponse(_ context.Context, resp *http.Response) (interface{}, error) {
 	var response CreateTokenResponse
 	err := json.NewDecoder(resp.Body).Decode(&response)
 	return response, err
