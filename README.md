@@ -11,7 +11,11 @@ jwtack := jwtackpckg.NewService()
 2) as coroutine:
 ```
 import jwtack "github.com/gobricks/jwtack/src"
-jwtack.Run(jwtack.Config{Port:8001})
+
+app := app.NewApp()
+app.Cfg.Port = "8080"
+
+jwtack.RunServer(app)
 ```
 
 3) as microservice:
