@@ -22,12 +22,17 @@ func DecodeCreateTokenRequest(_ context.Context, r *http.Request) (interface{}, 
 	var reqBody struct {
 		Key     string `json: "key,omitempty" `
 		Payload map[string]interface{} `json: "payload,omitempty"`
-		Exp     *time.Duration `json: "exp,omitempty"`
+		Exp     *time.Duration `json: "exp_sec,omitempty"`
 	}
 	reqBody.Key = r.Header.Get("X-Jwtack-Key")
 	if err := json.NewDecoder(bodyReader).Decode(&reqBody); err != nil {
 		fmt.Println("decodeEncodeTokenRequest ErrorBodyRaw:", string(body))
 		return nil, err
+	}
+
+	if reqBody.Exp != nil {
+		expSec := *reqBody.Exp * time.Second
+		reqBody.Exp = &expSec
 	}
 
 	return CreateTokenRequest{reqBody.Key, reqBody.Payload, reqBody.Exp}, nil

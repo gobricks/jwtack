@@ -1,4 +1,4 @@
-package loggers
+package app
 
 import (
 	stdlog "log"
@@ -10,7 +10,7 @@ type AppLogs struct {
 	Access, Error, Debug, Info log.Logger
 }
 
-func Load() AppLogs {
+func NewAppLogs(cfg AppConfig) AppLogs {
 
 	var access_log log.Logger
 	{

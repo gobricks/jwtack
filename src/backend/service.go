@@ -2,8 +2,7 @@ package backend
 
 import (
 	"sync"
-	logs "github.com/gobricks/jwtack/src/loggers"
-	metrics "github.com/gobricks/jwtack/src/metrics"
+	"github.com/gobricks/jwtack/src/app"
 	"github.com/dgrijalva/jwt-go"
 	"time"
 	"fmt"
@@ -17,8 +16,8 @@ type Service interface {
 }
 
 type service struct {
-	logger logs.AppLogs
-	mtx    sync.RWMutex
+	app app.App
+	mtx sync.RWMutex
 }
 
 func (s *service) CreateToken(key string, payload map[string]interface{}, exp *time.Duration) (t string, err error) {
@@ -43,7 +42,7 @@ func (s *service) ParseToken(token string, key string) (payload map[string]inter
 	})
 
 	if err != nil {
-		s.logger.Error.Log("jwt.Parse", err.Error())
+		s.app.Logs.Error.Log("jwt.Parse", err.Error())
 		err = fmt.Errorf("Incorrect token")
 	} else {
 		payload = t.Claims
@@ -55,14 +54,14 @@ func (s *service) ParseToken(token string, key string) (payload map[string]inter
 	return
 }
 
-func InitService(appLogs logs.AppLogs, appMetrics metrics.AppMetrics) Service {
+func InitService(app app.App) Service {
 	var svc Service
 	{
 		svc = &service{
-			logger:appLogs,
+			app:app,
 		}
-		svc = loggingMiddleware(appLogs)(svc)
-		svc = metricsMiddleware(appMetrics)(svc)
+		svc = loggingMiddleware(app.Logs)(svc)
+		svc = metricsMiddleware(app.Metrics)(svc)
 	}
 	return svc
 }

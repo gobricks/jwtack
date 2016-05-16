@@ -1,9 +1,10 @@
 package main
 
 import (
-	app "github.com/gobricks/jwtack/src"
+	jwtack "github.com/gobricks/jwtack/src"
+	app "github.com/gobricks/jwtack/src/app"
 )
 
 func main() {
-	app.Run(app.Config{})
+	jwtack.RunServer(app.NewApp())
 }

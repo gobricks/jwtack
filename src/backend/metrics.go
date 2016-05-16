@@ -1,18 +1,18 @@
 package backend
 
 import (
-	app_mertics "github.com/gobricks/jwtack/src/metrics"
+	"github.com/gobricks/jwtack/src/app"
 	"time"
 )
 
-func metricsMiddleware(metrics app_mertics.AppMetrics) ServiceMW {
+func metricsMiddleware(metrics app.AppMetrics) ServiceMW {
 	return func(next Service) Service {
 		return metricsMW{metrics, next}
 	}
 }
 
 type metricsMW struct {
-	metrics app_mertics.AppMetrics
+	metrics app.AppMetrics
 	Service
 }
 

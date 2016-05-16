@@ -1,4 +1,4 @@
-package metrics
+package app
 
 import (
 	"github.com/go-kit/kit/metrics"
@@ -34,7 +34,7 @@ func (m MethodTimeMetric)CatchOverTime(dur time.Duration, max time.Duration) {
 	m.th.Observe(dur)
 }
 
-func Load() AppMetrics {
+func NewAppMetrics(cfg AppConfig) AppMetrics {
 	var quantiles = []int{50, 90, 95, 99}
 	appMetrics := AppMetrics{
 		Access: AccessMetrics{

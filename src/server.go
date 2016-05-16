@@ -1,9 +1,8 @@
-package src
+package server
 
 import (
 	"net/http"
-	app_logs "github.com/gobricks/jwtack/src/loggers"
-	app_mertics "github.com/gobricks/jwtack/src/metrics"
+	"github.com/gobricks/jwtack/src/app"
 
 	"github.com/gobricks/jwtack/src/api"
 	"github.com/gobricks/jwtack/src/backend"
@@ -11,46 +10,28 @@ import (
 	"fmt"
 	"os"
 	"syscall"
-	"golang.org/x/net/context"
 )
 
-const (
-	defaultPort = "36801"
-)
-
-var AppLogs app_logs.AppLogs
-type Config struct {
-	Port string
+func NewService() backend.Service {
+	return backend.InitService(app.NewApp())
 }
 
-func NewService() backend.Service  {
-	AppLogs = app_logs.Load()
-	return backend.InitService(AppLogs, app_mertics.Load())
-}
+func RunServer(app app.App) {
+	svc := backend.InitService(app)
 
-func Run(cfg Config) {
-
-	if cfg.Port == "" {
-		cfg.Port = envString("PORT", defaultPort)
-	}
-
-	var (
-		httpAddr = ":" + cfg.Port
-		ctx = context.Background()
-		mux = http.NewServeMux()
-	)
-
-	AppLogs = app_logs.Load()
-	svc := backend.InitService(AppLogs, app_mertics.Load())
-	mux.Handle("/api/v1/", api.Handler(ctx, svc, AppLogs.Access))
+	mux := http.NewServeMux()
+	mux.Handle("/api/v1/", api.Handler(app, svc))
 
 	errCh := make(chan error, 2)
-	runServer(httpAddr, mux, errCh)
+	runServer(app, mux, errCh)
 	waitSyscall(errCh)
-	AppLogs.Error.Log("terminated", <-errCh)
+	app.Logs.Error.Log("terminated", <-errCh)
 }
 
-func runServer(httpAddr string, h http.Handler, errCh chan error) {
+func runServer(app app.App, h http.Handler, errCh chan error) {
+
+	httpAddr := ":" + app.Cfg.Port
+
 	http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
@@ -64,7 +45,7 @@ func runServer(httpAddr string, h http.Handler, errCh chan error) {
 	}))
 
 	go func() {
-		AppLogs.Info.Log("listen", "HTTP", "addr", httpAddr)
+		app.Logs.Info.Log("listen", "HTTP", "addr", httpAddr)
 		errCh <- http.ListenAndServe(httpAddr, nil)
 	}()
 }
@@ -75,12 +56,4 @@ func waitSyscall(errCh chan error) {
 		signal.Notify(c, syscall.SIGINT)
 		errCh <- fmt.Errorf("%s", <-c)
 	}()
-}
-
-func envString(env, fallback string) string {
-	e := os.Getenv(env)
-	if e == "" {
-		return fallback
-	}
-	return e
 }

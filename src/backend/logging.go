@@ -1,21 +1,20 @@
 package backend
 
 import (
-	app_logs "github.com/gobricks/jwtack/src/loggers"
+	"github.com/gobricks/jwtack/src/app"
 	"time"
 )
 
-func loggingMiddleware(logger app_logs.AppLogs) ServiceMW {
+func loggingMiddleware(logger app.AppLogs) ServiceMW {
 	return func(next Service) Service {
 		return logmw{logger, next}
 	}
 }
 
 type logmw struct {
-	logs app_logs.AppLogs
+	logs app.AppLogs
 	Service
 }
-
 
 func (mw logmw) CreateToken(key string, payload map[string]interface{}, exp *time.Duration) (t string, err error) {
 	defer func(begin time.Time) {
@@ -30,7 +29,6 @@ func (mw logmw) CreateToken(key string, payload map[string]interface{}, exp *tim
 	t, err = mw.Service.CreateToken(key, payload, exp)
 	return
 }
-
 
 func (mw logmw) ParseToken(token string, key string) (payload map[string]interface{}, err error) {
 	defer func(begin time.Time) {

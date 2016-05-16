@@ -7,23 +7,23 @@ import (
 	"github.com/gorilla/mux"
 	"golang.org/x/net/context"
 
-	kitlog "github.com/go-kit/kit/log"
 	kithttp "github.com/go-kit/kit/transport/http"
+	"github.com/gobricks/jwtack/src/app"
 	b "github.com/gobricks/jwtack/src/backend"
 	"github.com/gobricks/jwtack/src/api/create_token"
 	"github.com/gobricks/jwtack/src/api/parse_token"
 )
 
-func Handler(ctx context.Context, bs b.Service, logger kitlog.Logger) http.Handler {
+func Handler(app app.App, bs b.Service) http.Handler {
 	opts := []kithttp.ServerOption{
-		kithttp.ServerErrorLogger(logger),
+		kithttp.ServerErrorLogger(app.Logs.Error),
 		kithttp.ServerErrorEncoder(encodeError),
 	}
 
 	r := mux.NewRouter()
 
 	r.Handle(create_token.PathTemplate, kithttp.NewServer(
-		ctx,
+		app.Ctx,
 		create_token.MakeCreateTokenEndpoint(bs),
 		create_token.DecodeCreateTokenRequest,
 		encodeResponse,
@@ -31,7 +31,7 @@ func Handler(ctx context.Context, bs b.Service, logger kitlog.Logger) http.Handl
 	)).Methods("POST")
 
 	r.Handle(parse_token.PathTemplate, kithttp.NewServer(
-		ctx,
+		app.Ctx,
 		parse_token.MakeEndpoint(bs),
 		parse_token.DecodeRequest,
 		encodeResponse,
