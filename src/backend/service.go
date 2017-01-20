@@ -24,12 +24,15 @@ func (s *service) CreateToken(key string, payload map[string]interface{}, exp *t
 	if key == "" {
 		return "", fmt.Errorf("Empty required key")
 	}
-	token := jwt.New(jwt.SigningMethodHS256)
-	token.Claims = payload
+	var claims jwt.MapClaims
+	claims = payload
 	if exp != nil {
-		token.Claims["exp"] = time.Now().Add(*exp).Unix()
+		claims["exp"] = time.Now().Add(*exp).Unix()
 	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	token.SigningString()
+
 	t, err = token.SignedString([]byte(key))
 	return
 }
@@ -45,7 +48,7 @@ func (s *service) ParseToken(token string, key string) (payload map[string]inter
 		s.app.Logs.Error.Log("jwt.Parse", err.Error())
 		err = fmt.Errorf("Incorrect token")
 	} else {
-		payload = t.Claims
+		payload = t.Claims.(jwt.MapClaims)
 		if !t.Valid {
 			err = fmt.Errorf("Invalid token")
 		}
