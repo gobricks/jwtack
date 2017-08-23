@@ -15,14 +15,15 @@ func NewAppLogs(cfg AppConfig) AppLogs {
 	var access_log log.Logger
 	{
 		access_log = log.NewLogfmtLogger(os.Stdout)
-		access_log = log.NewContext(access_log).WithPrefix("type", "access").With("ts", log.DefaultTimestamp)
+		access_log = log.WithPrefix(access_log, "type", "access", "ts", log.DefaultTimestamp)
 	}
 
 	var error_log log.Logger
 	{
 		error_log = log.NewLogfmtLogger(os.Stderr)
-		error_log = log.NewContext(error_log).WithPrefix("type", "error").With(
-			"ts", log.DefaultTimestamp).With(
+		error_log = log.WithPrefix(error_log,
+			"type", "error",
+			"ts", log.DefaultTimestamp,
 			"caller", log.DefaultCaller)
 
 		stdlog.SetFlags(0)
@@ -32,15 +33,13 @@ func NewAppLogs(cfg AppConfig) AppLogs {
 	var debug_log log.Logger
 	{
 		debug_log = log.NewLogfmtLogger(os.Stdout)
-		debug_log = log.NewContext(debug_log).WithPrefix("type", "debug").With(
-			"ts", log.DefaultTimestamp)
+		debug_log = log.WithPrefix(debug_log, "type", "debug", "ts", log.DefaultTimestamp)
 	}
 
 	var info_log log.Logger
 	{
 		info_log = log.NewLogfmtLogger(os.Stdout)
-		info_log = log.NewContext(info_log).WithPrefix("type", "info").With(
-			"ts", log.DefaultTimestamp)
+		info_log = log.WithPrefix(info_log, "type", "info", "ts", log.DefaultTimestamp)
 	}
 
 	return AppLogs{access_log, error_log, debug_log, info_log}

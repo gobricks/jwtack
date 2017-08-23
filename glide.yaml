@@ -1,14 +1,9 @@
 package: github.com/gobricks/jwtack
 import:
 - package: github.com/dgrijalva/jwt-go
-- package: github.com/go-kit/kit
-  subpackages:
-  - endpoint
-  - log
-  - metrics
-  - metrics/expvar
-  - transport/http
 - package: github.com/gorilla/mux
 - package: golang.org/x/net
   subpackages:
   - context
+- package: github.com/go-kit/kit
+  version: ^0.5.0

@@ -1,7 +1,7 @@
 package parse_token
 
 import (
-	"golang.org/x/net/context"
+	"context"
 
 	"github.com/go-kit/kit/endpoint"
 	b "github.com/gobricks/jwtack/src/backend"

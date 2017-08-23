@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"golang.org/x/net/context"
+	"context"
 
 	"fmt"
 	"io/ioutil"

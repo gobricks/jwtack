@@ -23,7 +23,7 @@ type TimeMetrics struct {
 }
 
 type MethodTimeMetric struct {
-	th       metrics.TimeHistogram
+	th       metrics.Histogram
 	overtime metrics.Counter
 }
 
@@ -31,11 +31,10 @@ func (m MethodTimeMetric)CatchOverTime(dur time.Duration, max time.Duration) {
 	if dur > max {
 		m.overtime.Add(1)
 	}
-	m.th.Observe(dur)
+	m.th.Observe(float64(dur))
 }
 
 func NewAppMetrics(cfg AppConfig) AppMetrics {
-	var quantiles = []int{50, 90, 95, 99}
 	appMetrics := AppMetrics{
 		Access: AccessMetrics{
 			CreateToken: expvar.NewCounter("access_CreateToken"),
@@ -43,13 +42,11 @@ func NewAppMetrics(cfg AppConfig) AppMetrics {
 		},
 		Timers: TimeMetrics{
 			CreateToken: MethodTimeMetric{
-				metrics.NewTimeHistogram(time.Microsecond,
-					expvar.NewHistogram("duration_µs_CreateToken", 0, 10000, 3, quantiles...), ),
+				expvar.NewHistogram("duration_µs_CreateToken", 50),
 				expvar.NewCounter("overtime_CreateToken"),
 			},
 			ParseToken: MethodTimeMetric{
-				metrics.NewTimeHistogram(time.Microsecond,
-					expvar.NewHistogram("duration_µs_ParseToken", 0, 10000, 3, quantiles...), ),
+				expvar.NewHistogram("duration_µs_ParseToken", 50),
 				expvar.NewCounter("overtime_ParseToken"),
 			},
 		},

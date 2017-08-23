@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"golang.org/x/net/context"
+	"context"
 
 	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/gobricks/jwtack/src/app"
@@ -23,7 +23,6 @@ func Handler(app app.App, bs b.Service) http.Handler {
 	r := mux.NewRouter()
 
 	r.Handle(create_token.PathTemplate, kithttp.NewServer(
-		app.Ctx,
 		create_token.MakeCreateTokenEndpoint(bs),
 		create_token.DecodeCreateTokenRequest,
 		encodeResponse,
@@ -31,7 +30,6 @@ func Handler(app app.App, bs b.Service) http.Handler {
 	)).Methods("POST")
 
 	r.Handle(parse_token.PathTemplate, kithttp.NewServer(
-		app.Ctx,
 		parse_token.MakeEndpoint(bs),
 		parse_token.DecodeRequest,
 		encodeResponse,
